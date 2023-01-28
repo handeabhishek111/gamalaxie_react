@@ -159,7 +159,7 @@ const GameBoard: FC<GameBoardProps> = ({
                       let link = `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`;
                       console.log("responseJson-----", `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`);
                       const signer: any = await fetchSigner();
-                      const nftcontract = new ethers.Contract('0x72AC1a0305857E076AFAD34B7B7131a9580023F2', nftAbi, signer)
+                      const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT||'', nftAbi, signer)
                       await nftcontract
                         .mintToCaller(address, link, {
                           gasLimit: 1000000000,

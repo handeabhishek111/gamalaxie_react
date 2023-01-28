@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Grid, Typography, Box, TextField, Button } from '@mui/material';
-import { gridSpacing, fontSize, colors, images } from '../store/commonUtils';
+import { gridSpacing, fontSize, colors, images, callRpc, gameAbi, nftAbi } from '../store/commonUtils';
 import GameCard from '../components/cards/GameCard';
 import MetamaskButton from '../components/buttons/MetamaskButton';
 import { useAccount } from 'wagmi';
 import { useNavigate } from 'react-router';
 import MetamaskCard from '../components/cards/MetamaskCard';
+import { ethers } from 'ethers';
+import { fetchSigner } from '@wagmi/core'
+
 interface dataProps {
     gameTitle: string;
     gameDescription: string;
@@ -37,8 +40,27 @@ const DuelStart = () => {
         setUserAddress(address);
     }, [isConnected]);
 
-    const startDuel = () => {
+    const startDuel = async () => {
+        const priorityFee = await callRpc("eth_maxPriorityFeePerGas")
+        const signer: any = await fetchSigner();
+        const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT||'', nftAbi, signer)
+        // code to fetch tokeuri using tokenId
+        const tokenURI = await nftcontract.tokenURI(tokenId);
+        const response = await fetch(tokenURI);
+        const data = await response.json();
+        console.log(data);
 
+
+
+        // const gameContract = new ethers.Contract(process.env.REACT_APP_GAME_CONTRACT||'', gameAbi, signer)
+        // await gameContract
+        // .joinQueue(address, tokenId, {
+        //   gasLimit: 1000000000,
+        //   maxPriorityFeePerGas: priorityFee
+        // })
+        // .then((tx: any) => {
+        //   console.log("final tx---", tx)
+        // })
     }
 
     return (

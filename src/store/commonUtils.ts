@@ -7,7 +7,7 @@ export const fontSize = {
 };
 export { colors } from "./colors";
 export { images } from "./images";
-export { nftAbi } from "../assets/json/abi";
+export { nftAbi, gameAbi } from "../assets/json/abi";
 
 export const callRpc = async (method: any, params?: any) => {
     var options: any = {
@@ -25,6 +25,5 @@ export const callRpc = async (method: any, params?: any) => {
     };
     const res: any = await fetch("https://api.hyperspace.node.glif.io/rpc/v1", options);
     let newData = await res.json();
-    console.log("res---", newData?.result);
     return newData?.result;
 }
