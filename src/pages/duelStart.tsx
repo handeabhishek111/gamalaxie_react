@@ -16,58 +16,70 @@ interface dataProps {
     image: string;
     score: number;
     tokenId: number;
-    getToken: FunctionStringCallback;
 }
 
 const DuelStart = () => {
-    const cardList: dataProps[] = [
-        {
-            cardTitle: "2048 Game Card",
-            cardDescription: "A game of 2048",
-            image: images.game1,
-            score: 11,
-            tokenId: 1,
-            getToken: () => { }
-        },
-        {
-            cardTitle: "2048 Game Card",
-            cardDescription: "A game of 2048",
-            image: images.game1,
-            score: 11,
-            tokenId: 1,
-            getToken: () => { }
-        },
-    ];
+    const [nftCardList, setNftCardList] = useState<any>([]);
     const { address, isConnected } = useAccount();
     const [userAddress, setUserAddress] = useState<`0x${string}` | undefined>();
     const [tokenId, setTokenId] = useState<string>('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
+        setLoading(true);
         setUserAddress(address);
+        getList();
+
     }, [isConnected]);
 
-    const startDuel = async () => {
+    const getList = async () => {
+        const signer: any = await fetchSigner();
+        const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT || '',
+            nftAbi, signer)
+        let cardList = [];
+        // code to fetch tokeuri using tokenId
+        const tokenBalance = await nftcontract.balanceOf(address);
+        for (let i = 0; i < tokenBalance; i++) {
+            const indexTokenId = await nftcontract.tokenOfOwnerByIndex(address, i)
+            const tokenUri = await nftcontract.tokenURI(indexTokenId)
+            const response = await fetch(tokenUri);
+            const data = await response.json();
+            console.log("data---", data);
+            data['tokenId'] = parseInt(indexTokenId);
+            let newData: dataProps = {
+                cardTitle: data?.name,
+                cardDescription: data?.description,
+                image: data?.image,
+                score: data?.attributes[1]?.value,
+                tokenId: data?.tokenId,
+            }
+            cardList.push(newData);
+        }
+        Promise.all(cardList)
+            .then((res) => {
+                setNftCardList(res);
+                console.log("Response----", res)
+                setLoading(false);
+            })
+    }
+
+    const startDuel = async (tokenId: any = 1) => {
         const priorityFee = await callRpc("eth_maxPriorityFeePerGas")
         const signer: any = await fetchSigner();
-        const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT || '', nftAbi, signer)
-        // code to fetch tokeuri using tokenId
-        const tokenURI = await nftcontract.tokenURI(tokenId);
-        const response = await fetch(tokenURI);
-        const data = await response.json();
-        console.log(data);
 
-
-
-        // const gameContract = new ethers.Contract(process.env.REACT_APP_GAME_CONTRACT||'', gameAbi, signer)
-        // await gameContract
-        // .joinQueue(address, tokenId, {
-        //   gasLimit: 1000000000,
-        //   maxPriorityFeePerGas: priorityFee
-        // })
-        // .then((tx: any) => {
-        //   console.log("final tx---", tx)
-        // })
+        const gameContract = new ethers.Contract(process.env.REACT_APP_GAME_CONTRACT || '', gameAbi, signer)
+        const isPersoninQueue = await gameContract.isPersonInQueue(address)
+        if (!isPersoninQueue) {
+            await gameContract
+                .joinQueue(address, tokenId, {
+                    maxPriorityFeePerGas: priorityFee
+                })
+                .then(async (tx: any) => {
+                    console.log("final tx---", tx)
+                    const reciept = await tx.wait();
+                })
+        }
     }
 
     return (
@@ -110,14 +122,16 @@ const DuelStart = () => {
                         </Box>
                     </Box>
                 </Grid>
-                <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
-                    {cardList.map((item: dataProps, index: number) => (
+                {!loading && <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
+                    {nftCardList.map((item: dataProps, index: number) => (
                         <NFTBlockPuzzleCard
                             data={item}
                             key={index}
+                            //@ts-ignore
+                            getTokenId={(id: string) => { setTokenId(id) }}
                         />
                     ))}
-                </Grid>
+                </Grid>}
             </Grid>
         </Grid>
     )

@@ -15,7 +15,7 @@ contract Gamalaxie is ERC721, ERC721Enumerable, ERC721URIStorage, ERC721Burnable
 
     constructor() ERC721("Gamalaxie", "GMLX") {}
 
-    function safeMint(address to, string memory uri) public onlyOwner {
+    function safeMint(address to, string memory uri) public {
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(to, tokenId);

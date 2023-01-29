@@ -8,17 +8,18 @@ interface dataProps {
     image: string;
     score: number;
     tokenId: number;
-    getToken: FunctionStringCallback;
 }
 
 interface data {
     data: dataProps;
+    getTokenId: CallableFunction;
 }
 
-const NFTBlockPuzzleCard = ({ data }: data) => {
+
+const NFTBlockPuzzleCard = ({ data, getTokenId }: data) => {
     return (
         <Grid maxWidth={'calc(25 % - 30px)'} item lg={4} xl={4} md={4} sm={12}>
-            <Card style={{ padding: 10, margin: 4 }
+            <Card onClick={() => { getTokenId(String(data?.tokenId)) }} style={{ padding: 10, margin: 4 }
             } variant="outlined" >
                 <CardMedia
                     component="img"

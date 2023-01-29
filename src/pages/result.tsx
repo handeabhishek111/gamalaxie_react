@@ -24,7 +24,7 @@ const Result = () => {
     }, [isConnected]);
 
     const result = () => {
-
+        alert('dd')
     }
 
     return (
