@@ -8,27 +8,34 @@ import { useNavigate } from 'react-router';
 import MetamaskCard from '../components/cards/MetamaskCard';
 import { ethers } from 'ethers';
 import { fetchSigner } from '@wagmi/core'
+import NFTBlockPuzzleCard from '../components/cards/NFTBlockPuzzleCard';
 
 interface dataProps {
-    gameTitle: string;
-    gameDescription: string;
+    cardTitle: string;
+    cardDescription: string;
     image: string;
-    navigateTo: string;
+    score: number;
+    tokenId: number;
+    getToken: FunctionStringCallback;
 }
 
 const DuelStart = () => {
     const cardList: dataProps[] = [
         {
-            gameTitle: "2048",
-            gameDescription: "Play 2048 an easy but addictive game use your math power to score as much points as possible",
+            cardTitle: "2048 Game Card",
+            cardDescription: "A game of 2048",
             image: images.game1,
-            navigateTo: '2048-game'
+            score: 11,
+            tokenId: 1,
+            getToken: () => { }
         },
         {
-            gameTitle: "Tetris",
-            gameDescription: "Tetris is the old and still gold everyone's favourite passtime game. Try not to create an eiffel tower while playing to score more and more points as possible",
-            image: images.game2,
-            navigateTo: 'tetris-game'
+            cardTitle: "2048 Game Card",
+            cardDescription: "A game of 2048",
+            image: images.game1,
+            score: 11,
+            tokenId: 1,
+            getToken: () => { }
         },
     ];
     const { address, isConnected } = useAccount();
@@ -43,7 +50,7 @@ const DuelStart = () => {
     const startDuel = async () => {
         const priorityFee = await callRpc("eth_maxPriorityFeePerGas")
         const signer: any = await fetchSigner();
-        const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT||'', nftAbi, signer)
+        const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT || '', nftAbi, signer)
         // code to fetch tokeuri using tokenId
         const tokenURI = await nftcontract.tokenURI(tokenId);
         const response = await fetch(tokenURI);
@@ -103,14 +110,14 @@ const DuelStart = () => {
                         </Box>
                     </Box>
                 </Grid>
-                {/* <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
-                        {cardList.map((item: dataProps, index: number) => (
-                            <GameCard
-                                data={item}
-                                key={index}
-                            />
-                        ))}
-                    </Grid> */}
+                <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
+                    {cardList.map((item: dataProps, index: number) => (
+                        <NFTBlockPuzzleCard
+                            data={item}
+                            key={index}
+                        />
+                    ))}
+                </Grid>
             </Grid>
         </Grid>
     )
