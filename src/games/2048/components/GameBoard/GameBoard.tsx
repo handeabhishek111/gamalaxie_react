@@ -15,6 +15,7 @@ import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
 import { callRpc, nftAbi, REACT_APP_NFT_CONTRACT } from '../../../../store/commonUtils';
 import { fetchSigner } from '@wagmi/core'
 import { ethers, Wallet, providers } from 'ethers';
+import { useNavigate } from 'react-router';
 export interface GameBoardProps {
   tiles?: Tile[];
   gameStatus: GameStatus;
@@ -47,7 +48,7 @@ const GameBoard: FC<GameBoardProps> = ({
   onCloseNotification,
   total
 }) => {
-
+  const navigate = useNavigate();
   const { address, isConnected } = useAccount();
   const [{ width: tileWidth, height: tileHeight }, setTileSize] = useState(() =>
     calcTileSize(boardSize, rows, cols, spacing),
@@ -175,6 +176,10 @@ const GameBoard: FC<GameBoardProps> = ({
                             '\n receipt---',
                             receipt
                           );
+                          Promise.all(receipt)
+                            .then(() => {
+                              navigate('duel-start')
+                            })
                         });
                     }
                   });
