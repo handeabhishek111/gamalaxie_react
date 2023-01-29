@@ -134,5 +134,17 @@ constructor()
         return matchQueue;
     }
 
+    function getBetAmount() public payable 
+    {
+    
+    }
+
+    function getBalance() public view returns(uint) {
+        return address(this).balance;
+    }
+
+    function withdrawBetAmount(address payable winner) public {
+        winner.transfer(100000000000000000);
+    }
 
 }

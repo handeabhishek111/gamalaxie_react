@@ -27,3 +27,6 @@ export const callRpc = async (method: any, params?: any) => {
     let newData = await res.json();
     return newData?.result;
 }
+
+export const REACT_APP_NFT_CONTRACT = "0x7cE7316C75F7F70571F7b8b8BEf7B77873C3D94a";
+export const REACT_APP_GAME_CONTRACT = "0x200586063643040Bb31E4a0a57118dd4bB39e761";

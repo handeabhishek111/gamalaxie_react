@@ -12,14 +12,14 @@ interface dataProps {
 
 interface data {
     data: dataProps;
-    getTokenId: CallableFunction;
+    getTokenData: CallableFunction;
 }
 
 
-const NFTBlockPuzzleCard = ({ data, getTokenId }: data) => {
+const NFTBlockPuzzleCard = ({ data, getTokenData }: data) => {
     return (
         <Grid maxWidth={'calc(25 % - 30px)'} item lg={4} xl={4} md={4} sm={12}>
-            <Card onClick={() => { getTokenId(String(data?.tokenId)) }} style={{ padding: 10, margin: 4 }
+            <Card onClick={() => { getTokenData(String(data?.tokenId), String(data?.score)) }} style={{ padding: 10, margin: 4 }
             } variant="outlined" >
                 <CardMedia
                     component="img"

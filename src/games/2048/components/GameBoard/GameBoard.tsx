@@ -12,7 +12,7 @@ import { useScreenshot } from 'use-react-screenshot'
 import { Box as Box1, Button, Typography } from '@mui/material';
 import { colors } from '../../../../store/colors';
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
-import { callRpc, nftAbi } from '../../../../store/commonUtils';
+import { callRpc, nftAbi, REACT_APP_NFT_CONTRACT } from '../../../../store/commonUtils';
 import { fetchSigner } from '@wagmi/core'
 import { ethers, Wallet, providers } from 'ethers';
 export interface GameBoardProps {
@@ -63,33 +63,21 @@ const GameBoard: FC<GameBoardProps> = ({
   }, [boardSize, cols, rows, spacing]);
 
 
-  //! main code
-  // useEffect(() => {
-  //   (gameStatus === 'win' || gameStatus === 'lost') && takeSnapShot();
-  // }, [gameStatus]);
+  useEffect(() => {
+    (gameStatus === 'win' || gameStatus === 'lost') && takeSnapShot();
+  }, [gameStatus]);
 
-  // const takeSnapShot = () => {
-  //   console.log("status----", gameStatus)
-  //   if (gameStatus === 'win' || gameStatus === 'lost') {
-  //     takeScreenshot(boardRef.current);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   (gameStatus === 'win' || gameStatus === 'lost') && image && postGameData();
-  // }, [image])
-  //!
-  //? pagal code
   const takeSnapShot = () => {
     console.log("status----", gameStatus)
-    takeScreenshot(boardRef.current);
-
+    if (gameStatus === 'win' || gameStatus === 'lost') {
+      takeScreenshot(boardRef.current);
+    }
   }
 
   useEffect(() => {
-    postGameData();
+    (gameStatus === 'win' || gameStatus === 'lost') && image && postGameData();
   }, [image])
-  //?
+
 
   const postGameData = () => {
     const apiKey =
@@ -170,7 +158,7 @@ const GameBoard: FC<GameBoardProps> = ({
                       );
                       const signer: any = await fetchSigner();
                       const nftcontract = new ethers.Contract(
-                        process.env.REACT_APP_NFT_CONTRACT || '',
+                        REACT_APP_NFT_CONTRACT || '',
                         nftAbi,
                         signer
                       );
@@ -198,7 +186,6 @@ const GameBoard: FC<GameBoardProps> = ({
 
   return (
     <Box1 flex={1} flexDirection='column' >
-      <Button onClick={() => takeSnapShot()} >Result</Button>
       <Box position="relative" ref={boardRef}>
         <Grid
           width={boardSize}

@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Grid, Typography, Box, TextField, Button } from '@mui/material';
-import { gridSpacing, fontSize, colors, images, callRpc, gameAbi, nftAbi } from '../store/commonUtils';
+import {
+	gridSpacing,
+	fontSize,
+	colors,
+	images,
+	callRpc,
+	gameAbi,
+	nftAbi,
+	REACT_APP_NFT_CONTRACT,
+	REACT_APP_GAME_CONTRACT,
+} from '../store/commonUtils';
 import GameCard from '../components/cards/GameCard';
 import MetamaskButton from '../components/buttons/MetamaskButton';
 import { useAccount } from 'wagmi';
@@ -23,6 +33,7 @@ const DuelStart = () => {
     const { address, isConnected } = useAccount();
     const [userAddress, setUserAddress] = useState<`0x${string}` | undefined>();
     const [tokenId, setTokenId] = useState<string>('');
+    const [tokenScore, setTokenScore] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -35,7 +46,7 @@ const DuelStart = () => {
 
     const getList = async () => {
         const signer: any = await fetchSigner();
-        const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT || '',
+        const nftcontract = new ethers.Contract(REACT_APP_NFT_CONTRACT || '',
             nftAbi, signer)
         let cardList = [];
         // code to fetch tokeuri using tokenId
@@ -64,23 +75,44 @@ const DuelStart = () => {
             })
     }
 
-    const startDuel = async (tokenId: any = 1) => {
-        const priorityFee = await callRpc("eth_maxPriorityFeePerGas")
-        const signer: any = await fetchSigner();
+    const startDuel = async () => {
+			console.log(
+				'selected token details: tokenId: ',
+				tokenId,
+				'| tokenScore: ',
+				tokenScore
+			);
+			const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
+			const signer: any = await fetchSigner();
 
-        const gameContract = new ethers.Contract(process.env.REACT_APP_GAME_CONTRACT || '', gameAbi, signer)
-        const isPersoninQueue = await gameContract.isPersonInQueue(address)
-        if (!isPersoninQueue) {
-            await gameContract
-                .joinQueue(address, tokenId, {
-                    maxPriorityFeePerGas: priorityFee
-                })
-                .then(async (tx: any) => {
-                    console.log("final tx---", tx)
-                    const reciept = await tx.wait();
-                })
-        }
-    }
+			const gameContract = new ethers.Contract(
+				REACT_APP_GAME_CONTRACT || '',
+				gameAbi,
+				signer
+			);
+			const isPersoninQueue = await gameContract.isPersonInQueue(address);
+			if (!isPersoninQueue) {
+				await gameContract
+					.getBetAmount({
+						maxPriorityFeePerGas: priorityFee,
+						value: ethers.utils.parseEther('0.01'),
+					})
+					.then(async (tx: any) => {
+						const reciept = await tx.wait();
+						console.log('reciept of getBetAmount---', reciept);
+						if (reciept.status) {
+							await gameContract
+								.joinQueue(address, tokenId, parseInt(tokenScore), {
+									maxPriorityFeePerGas: priorityFee,
+								})
+								.then(async (tx: any) => {
+									const reciept = await tx.wait();
+									console.log('reciept of joinQueue---', reciept);
+								});
+						}
+					});
+			}
+		};
 
     return (
         <Grid md={12}>
@@ -128,7 +160,7 @@ const DuelStart = () => {
                             data={item}
                             key={index}
                             //@ts-ignore
-                            getTokenId={(id: string) => { setTokenId(id) }}
+                            getTokenData={(id: string, score: string) => { setTokenId(id); setTokenScore(score) }}
                         />
                     ))}
                 </Grid>}
