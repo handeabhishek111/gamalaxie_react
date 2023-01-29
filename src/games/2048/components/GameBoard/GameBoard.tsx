@@ -64,31 +64,31 @@ const GameBoard: FC<GameBoardProps> = ({
 
 
   //! main code
-  useEffect(() => {
-    (gameStatus === 'win' || gameStatus === 'lost') && takeSnapShot();
-  }, [gameStatus]);
+  // useEffect(() => {
+  //   (gameStatus === 'win' || gameStatus === 'lost') && takeSnapShot();
+  // }, [gameStatus]);
 
-  const takeSnapShot = () => {
-    console.log("status----", gameStatus)
-    if (gameStatus === 'win' || gameStatus === 'lost') {
-      takeScreenshot(boardRef.current);
-    }
-  }
-
-  useEffect(() => {
-    (gameStatus === 'win' || gameStatus === 'lost') && image && postGameData();
-  }, [image])
-  //!
-  //? pagal code
   // const takeSnapShot = () => {
   //   console.log("status----", gameStatus)
-  //   takeScreenshot(boardRef.current);
-
+  //   if (gameStatus === 'win' || gameStatus === 'lost') {
+  //     takeScreenshot(boardRef.current);
+  //   }
   // }
 
   // useEffect(() => {
-  //   postGameData();
+  //   (gameStatus === 'win' || gameStatus === 'lost') && image && postGameData();
   // }, [image])
+  //!
+  //? pagal code
+  const takeSnapShot = () => {
+    console.log("status----", gameStatus)
+    takeScreenshot(boardRef.current);
+
+  }
+
+  useEffect(() => {
+    postGameData();
+  }, [image])
   //?
 
   const postGameData = () => {
@@ -149,27 +149,47 @@ const GameBoard: FC<GameBoardProps> = ({
                 console.log(metadataFile);
                 const form = new FormData();
                 form.append("file", metadataFile);
-                fetch("https://api.nft.storage/upload", options(form))
+                fetch('https://api.nft.storage/upload', options(form))
                   .then((response) => {
                     return response.json();
                   })
                   .then(async (responseJson) => {
                     if (responseJson.ok) {
-                      const priorityFee = await callRpc("eth_maxPriorityFeePerGas")
+                      const priorityFee = await callRpc(
+                        'eth_maxPriorityFeePerGas'
+                      );
+                      const gasPrice = await callRpc('eth_gasPrice');
                       let link = `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`;
-                      console.log("responseJson-----", `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`);
+                      console.log(
+                        'responseJson-----',
+                        `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`,
+                        '\n gasPrice---',
+                        gasPrice,
+                        '\n priorityFee---',
+                        priorityFee,
+                      );
                       const signer: any = await fetchSigner();
-                      const nftcontract = new ethers.Contract(process.env.REACT_APP_NFT_CONTRACT||'', nftAbi, signer)
+                      const nftcontract = new ethers.Contract(
+                        process.env.REACT_APP_NFT_CONTRACT || '',
+                        nftAbi,
+                        signer
+                      );
                       await nftcontract
-                        .mintToCaller(address, link, {
+                        .safeMint(address, link, {
+                          gasPrice: gasPrice,
                           gasLimit: 1000000000,
-                          maxPriorityFeePerGas: priorityFee
                         })
-                        .then((tx: any) => {
-                          console.log("final tx---", tx)
-                        })
+                        .then(async (tx: any) => {
+                          const receipt = await tx.wait();
+                          console.log(
+                            'final tx---',
+                            tx,
+                            '\n receipt---',
+                            receipt
+                          );
+                        });
                     }
-                  })
+                  });
               }
             })
         })
@@ -178,7 +198,7 @@ const GameBoard: FC<GameBoardProps> = ({
 
   return (
     <Box1 flex={1} flexDirection='column' >
-      {/* <Button onClick={() => takeSnapShot()} >Result</Button> */}
+      <Button onClick={() => takeSnapShot()} >Result</Button>
       <Box position="relative" ref={boardRef}>
         <Grid
           width={boardSize}
