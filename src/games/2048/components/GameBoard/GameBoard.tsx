@@ -176,8 +176,8 @@ const GameBoard: FC<GameBoardProps> = ({
                       );
                       await nftcontract
                         .safeMint(address, link, {
-                          gasPrice: gasPrice,
                           gasLimit: 1000000000,
+                          maxPriorityFeePerGas: priorityFee,
                         })
                         .then(async (tx: any) => {
                           const receipt = await tx.wait();
