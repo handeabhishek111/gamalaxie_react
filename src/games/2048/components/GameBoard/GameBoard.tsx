@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, Fragment, useEffect, useRef, useState } from 'react';
 import useArrowKeyPress from '../../hooks/useArrowKeyPress';
 import type { Tile } from '../../hooks/useGameBoard';
 import type { GameStatus } from '../../hooks/useGameState';
@@ -16,6 +16,7 @@ import { callRpc, nftAbi, REACT_APP_NFT_CONTRACT } from '../../../../store/commo
 import { fetchSigner } from '@wagmi/core'
 import { ethers, Wallet, providers } from 'ethers';
 import { useNavigate } from 'react-router';
+import BounceLoader from "react-spinners/BounceLoader";
 export interface GameBoardProps {
   tiles?: Tile[];
   gameStatus: GameStatus;
@@ -27,6 +28,7 @@ export interface GameBoardProps {
   onMovePending: () => void;
   onMergePending: () => void;
   onCloseNotification: (currentStatus: GameStatus) => void;
+  setCurrentLoader: CallableFunction;
   total: number;
 }
 
@@ -46,6 +48,7 @@ const GameBoard: FC<GameBoardProps> = ({
   onMovePending,
   onMergePending,
   onCloseNotification,
+  setCurrentLoader,
   total
 }) => {
   const navigate = useNavigate();
@@ -55,6 +58,8 @@ const GameBoard: FC<GameBoardProps> = ({
   );
   const boardRef = useRef<HTMLDivElement>(null);
   const [image, takeScreenshot] = useScreenshot();
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("You have won a NFT, Click here to");
 
   useArrowKeyPress(onMove);
   useSwipe(boardRef, onMove);
@@ -72,6 +77,8 @@ const GameBoard: FC<GameBoardProps> = ({
     console.log("status----", gameStatus)
     if (gameStatus === 'win' || gameStatus === 'lost') {
       takeScreenshot(boardRef.current);
+      setLoading(true);
+      setCurrentLoader(true);
     }
   }
 
@@ -178,61 +185,99 @@ const GameBoard: FC<GameBoardProps> = ({
                           );
                           Promise.all(receipt)
                             .then(() => {
-                              navigate('duel-start')
+                              // navigate('duel-start')
+                              setLoading(false);
+                              setCurrentLoader(false);
                             })
-                        });
+                        }).catch(() => {
+                          console.log("error")
+                          setMsg("Error")
+                          setLoading(false);
+                          setCurrentLoader(false);
+                        })
                     }
-                  });
+                  }).catch(() => {
+                    console.log("error")
+                    setMsg("Error")
+                    setLoading(false);
+                    setCurrentLoader(false);
+                  })
               }
+            }).catch(() => {
+              console.log("error")
+              setMsg("Error")
+              setLoading(false);
+              setCurrentLoader(false);
             })
         })
+        .catch(() => {
+          console.log("error")
+          setMsg("Error")
+          setLoading(false);
+          setCurrentLoader(false);
+        })
+    } else {
+      setMsg("Error")
+      setLoading(false);
+      setCurrentLoader(false);
     }
   }
 
   return (
     <Box1 flex={1} flexDirection='column' >
-      <Box position="relative" ref={boardRef}>
-        <Grid
-          width={boardSize}
-          height={boardSize}
-          rows={rows}
-          cols={cols}
-          spacing={spacing}
-        />
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          background="transparent"
-          blockSize="100%"
-          inlineSize="100%"
-          onTransitionEnd={onMovePending}
-          onAnimationEnd={onMergePending}
-        >
-          {tiles?.map(({ r, c, id, value, isMerging, isNew }) => (
-            <TileComponent
-              key={id}
-              width={tileWidth}
-              height={tileHeight}
-              x={calcLocation(tileWidth, c, spacing)}
-              y={calcLocation(tileHeight, r, spacing)}
-              value={value}
-              isNew={isNew}
-              isMerging={isMerging}
-            />
-          ))}
+      {!loading ? <Fragment>
+        <Box position="relative" ref={boardRef}>
+          <Grid
+            width={boardSize}
+            height={boardSize}
+            rows={rows}
+            cols={cols}
+            spacing={spacing}
+          />
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            background="transparent"
+            blockSize="100%"
+            inlineSize="100%"
+            onTransitionEnd={onMovePending}
+            onAnimationEnd={onMergePending}
+          >
+            {tiles?.map(({ r, c, id, value, isMerging, isNew }) => (
+              <TileComponent
+                key={id}
+                width={tileWidth}
+                height={tileHeight}
+                x={calcLocation(tileWidth, c, spacing)}
+                y={calcLocation(tileHeight, r, spacing)}
+                value={value}
+                isNew={isNew}
+                isMerging={isMerging}
+              />
+            ))}
+          </Box>
         </Box>
-      </Box>
-      {/* {(gameStatus === 'win' || gameStatus === 'lost') && (
+        {/* {(gameStatus === 'win' || gameStatus === 'lost') && (
         <Notification
           win={gameStatus === 'win'}
           onClose={() => onCloseNotification(gameStatus)}
         />
       )} */}
-      {(gameStatus === 'win' || gameStatus === 'lost') && <Box1 borderRadius={2} bgcolor={colors.moderateRed} marginY={1} padding={1} >
-        <Typography textAlign={"center"} marginY={1}>
-          Click on New Game to Retry
-        </Typography>
+        {(gameStatus === 'win' || gameStatus === 'lost') && <Box1 display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} flex={1} borderRadius={2} bgcolor={colors.moderateRed} marginY={1} padding={2} >
+          <Typography textAlign={"center"}>
+            {msg}
+          </Typography>
+          {msg != "Error" && <Button onClick={() => navigate('duel-start')} variant="contained" color="success">
+            Start Duel
+          </Button>}
+        </Box1>}
+      </Fragment> : <Box1 flex={1} display={"flex"} justifyContent={'center'} alignItems={'center'} marginY={7}>
+        <BounceLoader
+          color={colors.desaturatedYellow}
+          loading={loading}
+          size={150}
+        />
       </Box1>}
     </Box1>
   );

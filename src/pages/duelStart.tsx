@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Grid, Typography, Box, TextField, Button } from '@mui/material';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Container, Grid, Typography, Box, TextField, Button, Modal } from '@mui/material';
 import {
-	gridSpacing,
-	fontSize,
-	colors,
-	images,
-	callRpc,
-	gameAbi,
-	nftAbi,
-	REACT_APP_NFT_CONTRACT,
-	REACT_APP_GAME_CONTRACT,
+    gridSpacing,
+    fontSize,
+    colors,
+    images,
+    callRpc,
+    gameAbi,
+    nftAbi,
+    REACT_APP_NFT_CONTRACT,
+    REACT_APP_GAME_CONTRACT,
 } from '../store/commonUtils';
 import GameCard from '../components/cards/GameCard';
 import MetamaskButton from '../components/buttons/MetamaskButton';
@@ -19,6 +19,7 @@ import MetamaskCard from '../components/cards/MetamaskCard';
 import { ethers } from 'ethers';
 import { fetchSigner } from '@wagmi/core'
 import NFTBlockPuzzleCard from '../components/cards/NFTBlockPuzzleCard';
+import BounceLoader from "react-spinners/BounceLoader";
 
 interface dataProps {
     cardTitle: string;
@@ -35,8 +36,23 @@ const DuelStart = () => {
     const [tokenId, setTokenId] = useState<string>('');
     const [tokenScore, setTokenScore] = useState<string>('');
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const [loading2, setLoading2] = useState(false);
+    const [openModal, setOpenModal] = React.useState(false);
 
+    const navigate = useNavigate();
+    const style = {
+        position: 'absolute' as 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 400,
+        bgcolor: colors.white,
+        border: `2px solid ${colors.desaturatedYellow}`,
+        boxShadow: 24,
+        pt: 2,
+        px: 4,
+        pb: 3,
+    };
     useEffect(() => {
         setLoading(true);
         setUserAddress(address);
@@ -76,43 +92,59 @@ const DuelStart = () => {
     }
 
     const startDuel = async () => {
-			console.log(
-				'selected token details: tokenId: ',
-				tokenId,
-				'| tokenScore: ',
-				tokenScore
-			);
-			const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
-			const signer: any = await fetchSigner();
 
-			const gameContract = new ethers.Contract(
-				REACT_APP_GAME_CONTRACT || '',
-				gameAbi,
-				signer
-			);
-			const isPersoninQueue = await gameContract.isPersonInQueue(address);
-			if (!isPersoninQueue) {
-				await gameContract
-					.getBetAmount({
-						maxPriorityFeePerGas: priorityFee,
-						value: ethers.utils.parseEther('0.01'),
-					})
-					.then(async (tx: any) => {
-						const reciept = await tx.wait();
-						console.log('reciept of getBetAmount---', reciept);
-						if (reciept.status) {
-							await gameContract
-								.joinQueue(address, tokenId, parseInt(tokenScore), {
-									maxPriorityFeePerGas: priorityFee,
-								})
-								.then(async (tx: any) => {
-									const reciept = await tx.wait();
-									console.log('reciept of joinQueue---', reciept);
-								});
-						}
-					});
-			}
-		};
+        console.log(
+            'selected token details: tokenId: ',
+            tokenId,
+            '| tokenScore: ',
+            tokenScore
+        );
+        const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
+        const signer: any = await fetchSigner();
+
+        const gameContract = new ethers.Contract(
+            REACT_APP_GAME_CONTRACT || '',
+            gameAbi,
+            signer
+        );
+        const isPersoninQueue = await gameContract.isPersonInQueue(address);
+        if (!isPersoninQueue) {
+            handleOpen();
+            setLoading2(true)
+            await gameContract
+                .getBetAmount({
+                    maxPriorityFeePerGas: priorityFee,
+                    value: ethers.utils.parseEther('0.01'),
+                })
+                .then(async (tx: any) => {
+                    const reciept = await tx.wait();
+                    console.log('reciept of getBetAmount---', reciept);
+                    if (reciept.status) {
+                        await gameContract
+                            .joinQueue(address, tokenId, parseInt(tokenScore), {
+                                maxPriorityFeePerGas: priorityFee,
+                            })
+                            .then(async (tx: any) => {
+                                const reciept = await tx.wait();
+                                console.log('reciept of joinQueue---', reciept);
+                                setLoading2(false)
+                            })
+                            .catch(() => {
+                                setLoading2(false)
+                            })
+                    }
+                })
+                .catch(() => {
+                    setLoading2(false)
+                })
+        }
+    };
+    const handleOpen = () => {
+        setOpenModal(true);
+    };
+    const handleClose = () => {
+        setOpenModal(false);
+    };
 
     return (
         <Grid md={12}>
@@ -154,7 +186,7 @@ const DuelStart = () => {
                         </Box>
                     </Box>
                 </Grid>
-                {!loading && <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
+                {!loading ? <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
                     {nftCardList.map((item: dataProps, index: number) => (
                         <NFTBlockPuzzleCard
                             data={item}
@@ -163,8 +195,43 @@ const DuelStart = () => {
                             getTokenData={(id: string, score: string) => { setTokenId(id); setTokenScore(score) }}
                         />
                     ))}
-                </Grid>}
+                </Grid> :
+                    <Box flex={1} display={"flex"} justifyContent={'center'} alignItems={'center'} marginY={7}>
+                        <BounceLoader
+                            color={colors.desaturatedYellow}
+                            loading={loading}
+                            size={150}
+                        />
+                    </Box>
+                }
             </Grid>
+            <Modal
+                hideBackdrop
+                open={openModal}
+                aria-labelledby="child-modal-title"
+                aria-describedby="child-modal-description"
+            >
+                <Box alignContent={'center'} sx={{ ...style, width: 200 }}>
+                    {loading2 ? <Fragment>
+                        <BounceLoader
+                            color={colors.desaturatedYellow}
+                            loading={loading2}
+                            size={150}
+                        />
+                        <Typography color={colors.veryDarkBlue} fontWeight={'bold'} fontSize={fontSize.lg} alignItems={'flex-start'}>
+                            Please wait.....
+                        </Typography>
+                    </Fragment> : <Box paddingY={2} flex={1} display={'flex'} alignItems={'center'} justifyContent={'space-evenly'} flexDirection={'row'}>
+                        <Button onClick={() => navigate('result')} variant="contained" color={'success'}>
+                            Show Result
+                        </Button>
+                        <Button onClick={() => handleClose()} variant="contained" color={'success'}>
+                            Cancel
+                        </Button>
+                    </Box>}
+
+                </Box>
+            </Modal>
         </Grid>
     )
 }

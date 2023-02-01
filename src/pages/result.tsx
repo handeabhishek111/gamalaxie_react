@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Grid, Typography, Box, TextField, Button } from '@mui/material';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Container, Grid, Typography, Box, TextField, Button, Modal } from '@mui/material';
 import { gridSpacing, fontSize, colors, images, callRpc, REACT_APP_GAME_CONTRACT, gameAbi, REACT_APP_NFT_CONTRACT, nftAbi } from '../store/commonUtils';
 import GameCard from '../components/cards/GameCard';
 import MetamaskButton from '../components/buttons/MetamaskButton';
@@ -9,10 +9,10 @@ import MetamaskCard from '../components/cards/MetamaskCard';
 import { fetchSigner } from '@wagmi/core'
 import { ethers } from 'ethers';
 interface dataProps {
-    gameTitle: string;
-    gameDescription: string;
-    image: string;
-    navigateTo: string;
+	gameTitle: string;
+	gameDescription: string;
+	image: string;
+	navigateTo: string;
 }
 
 const Result = () => {
@@ -20,10 +20,31 @@ const Result = () => {
 	const [userAddress, setUserAddress] = useState<`0x${string}` | undefined>();
 	const [gameResult, setGameResult] = useState<string>('');
 	const navigate = useNavigate();
-
+	const [openModal, setOpenModal] = React.useState(false);
+	const [loading, setLoading] = useState(false);
+	const [alertText, setAlertText] = useState('');
+	const style = {
+		position: 'absolute' as 'absolute',
+		top: '50%',
+		left: '50%',
+		transform: 'translate(-50%, -50%)',
+		width: 400,
+		bgcolor: colors.white,
+		border: `2px solid ${colors.desaturatedYellow}`,
+		boxShadow: 24,
+		pt: 2,
+		px: 4,
+		pb: 3,
+	};
 	useEffect(() => {
 		setUserAddress(address);
 	}, [isConnected]);
+	const handleOpen = () => {
+		setOpenModal(true);
+	};
+	const handleClose = () => {
+		setOpenModal(false);
+	};
 
 	const result = async () => {
 		const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
@@ -39,9 +60,11 @@ const Result = () => {
 			maxPriorityFeePerGas: priorityFee,
 		});
 		if (isPersonInQueue) {
-			alert(
-				'You are in queue, please wait till you get a match with a random player'
-			);
+			setAlertText('You are in queue, please wait till you get a match with a random player')
+			handleOpen();
+			// alert(
+			// 	'You are in queue, please wait till you get a match with a random player'
+			// );
 			return;
 		}
 		const userData = await gameContract.getPlayer(address, {
@@ -56,11 +79,15 @@ const Result = () => {
 			const lastBattleFought = JSON.parse(userData.lastBattleFought);
 			console.log(lastBattleFought);
 			setGameResult(lastBattleFought ? 'You Won' : 'You Lost');
-			alert(
-				lastBattleFought
-					? 'You Won, to claim the reward you must burn your NFT'
-					: 'You Lost, Your data will be deleted so you can play the next game'
-			);
+			// alert(
+			// 	lastBattleFought
+			// 		? 'You Won, to claim the reward you must burn your NFT'
+			// 		: 'You Lost, Your data will be deleted so you can play the next game'
+			// );
+			setAlertText(lastBattleFought
+				? 'You Won, to claim the reward you must burn your NFT'
+				: 'You Lost, Your data will be deleted so you can play the next game')
+			handleOpen();
 			// declare the NFT contract
 			const nftContract = new ethers.Contract(
 				REACT_APP_NFT_CONTRACT || '',
@@ -77,7 +104,9 @@ const Result = () => {
 						const reciept = await tx.wait();
 						console.log('reciept of Burn---', reciept);
 						if (reciept.status) {
-							alert('NFT Burned Successfully, You can claim your reward now');
+							// alert('NFT Burned Successfully, You can claim your reward now');
+							setAlertText('NFT Burned Successfully, You can claim your reward now')
+							handleOpen();
 							// load the game contract function withdrawBetAmount
 							await gameContract
 								.withdrawBetAmount(address, {
@@ -87,9 +116,11 @@ const Result = () => {
 									const reciept = await tx.wait();
 									console.log('reciept of withdrawBetAmount---', reciept);
 									if (reciept.status) {
-										alert(
-											'Reward Claimed Successfully, Your data will be deleted so you can play the next game'
-										);
+										// alert(
+										// 	'Reward Claimed Successfully, Your data will be deleted so you can play the next game'
+										// );
+										setAlertText('Reward Claimed Successfully, Your data will be deleted so you can play the next game')
+										handleOpen();
 									}
 								});
 						}
@@ -104,13 +135,17 @@ const Result = () => {
 					const reciept = await tx.wait();
 					console.log('reciept of deletePlayer---', reciept);
 					if (reciept.status) {
-						alert('Your data has been deleted successfully');
+						setAlertText('Your data has been deleted successfully')
+						handleOpen();
+						// alert('Your data has been deleted successfully');
 					}
 				});
 		} else {
-			alert(
-				'You have not played any game yet, Please first participate in Duel'
-			);
+			setAlertText('You have not played any game yet, Please first participate in Duel')
+			handleOpen();
+			// alert(
+			// 	'You have not played any game yet, Please first participate in Duel'
+			// );
 		}
 	};
 
@@ -167,7 +202,7 @@ const Result = () => {
 								marginTop={2}
 								color={colors.veryDarkBlue}
 								fontWeight={'bold'}
-								fontSize={fontSize.sm}
+								fontSize={fontSize.md}
 							>
 								{gameResult}
 							</Typography>
@@ -183,6 +218,23 @@ const Result = () => {
                         ))}
                     </Grid> */}
 			</Grid>
+			<Modal
+				hideBackdrop
+				open={openModal}
+				aria-labelledby="child-modal-title"
+				aria-describedby="child-modal-description"
+			>
+				<Box alignContent={'center'} sx={{ ...style, width: 200 }}>
+					<Typography color={colors.veryDarkBlue} fontWeight={'bold'} fontSize={fontSize.lg} alignItems={'flex-start'}>
+						{alertText}
+					</Typography>
+					<Box marginTop={2}>
+						<Button onClick={() => handleClose()} variant="contained" color={'success'}>
+							Cancel
+						</Button>
+					</Box>
+				</Box>
+			</Modal>
 		</Grid>
 	);
 };

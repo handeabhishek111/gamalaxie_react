@@ -27,11 +27,12 @@ interface BlockPuzzleComponent {
   bestPropScore: any;
   currentPropScore: any;
   newGameFn: any
+  setCurrentLoader: CallableFunction
 }
 
 const APP_NAME = 'react-2048';
 
-const BlockPuzzleComponent = ({ bestPropScore, currentPropScore, newGameFn }: BlockPuzzleComponent) => {
+const BlockPuzzleComponent = ({ bestPropScore, currentPropScore, newGameFn, setCurrentLoader }: BlockPuzzleComponent) => {
   const [gameState, setGameStatus] = useGameState({
     status: 'running',
     pause: false,
@@ -132,6 +133,7 @@ const BlockPuzzleComponent = ({ bestPropScore, currentPropScore, newGameFn }: Bl
             onMergePending={onMergePending}
             onCloseNotification={onCloseNotification}
             total={total}
+            setCurrentLoader={(bol: boolean) => setCurrentLoader(bol)}
           />
         </Box>
       </Box>

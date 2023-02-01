@@ -13,6 +13,7 @@ const SlidingBlockPuzzle = () => {
     const [currentScore, setCurrentScore] = useState(0);
     const [newGameTrigger, setNewGameTrigger] = useState(true);
     const { address, isConnected } = useAccount();
+    const [disableButton, setDisableButton] = useState(false);
 
     return (
         <Grid md={12}>
@@ -29,7 +30,7 @@ const SlidingBlockPuzzle = () => {
             <Grid item xs={12}>
                 <MetamaskCard />
                 <Box borderRadius={3} display={'flex'} flexDirection={'row'} bgcolor={colors.grayishYellow} paddingY={2} paddingX={2} marginTop={1} justifyContent={'space-between'}>
-                    <Button onClick={() => setNewGameTrigger(bol => !bol)} variant="contained" color="success">
+                    <Button disabled={disableButton} onClick={() => setNewGameTrigger(bol => !bol)} variant="contained" color="success">
                         New Game
                     </Button>
                     <Box display={'flex'} flexDirection={'column'} flex={1} paddingX={2} >
@@ -63,7 +64,7 @@ const SlidingBlockPuzzle = () => {
                     </Box>
                 </Box>
                 <Grid item>
-                    <BlockPuzzleComponent newGameFn={newGameTrigger} bestPropScore={(best: number) => setBestScore(best)} currentPropScore={(current: number) => setCurrentScore(current)} />
+                    <BlockPuzzleComponent newGameFn={newGameTrigger} bestPropScore={(best: number) => setBestScore(best)} currentPropScore={(current: number) => setCurrentScore(current)} setCurrentLoader={(bol: boolean) => { setDisableButton(bol) }} />
                 </Grid>
             </Grid>
         </Grid>
