@@ -144,7 +144,8 @@ constructor()
     }
 
     function withdrawBetAmount(address payable winner) public {
-        winner.transfer(100000000000000000);
+        winner.transfer(20000000000000000);
+        deleteUser(winner);
     }
 
 }

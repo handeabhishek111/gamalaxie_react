@@ -113,7 +113,7 @@ const DuelStart = () => {
             setLoading2(true)
             await gameContract
                 .getBetAmount({
-                    maxPriorityFeePerGas: priorityFee,
+                    //maxPriorityFeePerGas: priorityFee,
                     value: ethers.utils.parseEther('0.01'),
                 })
                 .then(async (tx: any) => {
@@ -122,7 +122,7 @@ const DuelStart = () => {
                     if (reciept.status) {
                         await gameContract
                             .joinQueue(address, tokenId, parseInt(tokenScore), {
-                                maxPriorityFeePerGas: priorityFee,
+                                //maxPriorityFeePerGas: priorityFee,
                             })
                             .then(async (tx: any) => {
                                 const reciept = await tx.wait();
@@ -137,6 +137,8 @@ const DuelStart = () => {
                 .catch(() => {
                     setLoading2(false)
                 })
+        } else {
+            console.log("If person is in queue")
         }
     };
     const handleOpen = () => {
@@ -222,7 +224,7 @@ const DuelStart = () => {
                             Please wait.....
                         </Typography>
                     </Fragment> : <Box paddingY={2} flex={1} display={'flex'} alignItems={'center'} justifyContent={'space-evenly'} flexDirection={'row'}>
-                        <Button onClick={() => navigate('result')} variant="contained" color={'success'}>
+                        <Button onClick={() => navigate('/result')} variant="contained" color={'success'}>
                             Show Result
                         </Button>
                         <Button onClick={() => handleClose()} variant="contained" color={'success'}>

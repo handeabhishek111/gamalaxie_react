@@ -57,7 +57,7 @@ const Result = () => {
 		);
 		// check Person in queue
 		const isPersonInQueue = await gameContract.isPersonInQueue(address, {
-			maxPriorityFeePerGas: priorityFee,
+			//maxPriorityFeePerGas: priorityFee,
 		});
 		if (isPersonInQueue) {
 			setAlertText('You are in queue, please wait till you get a match with a random player')
@@ -68,7 +68,7 @@ const Result = () => {
 			return;
 		}
 		const userData = await gameContract.getPlayer(address, {
-			maxPriorityFeePerGas: priorityFee,
+			//maxPriorityFeePerGas: priorityFee,
 		});
 		console.log('userData', userData);
 
@@ -98,7 +98,7 @@ const Result = () => {
 				// call the burn function
 				await nftContract
 					.burn(userData.tokenId, {
-						maxPriorityFeePerGas: priorityFee,
+						//maxPriorityFeePerGas: priorityFee,
 					})
 					.then(async (tx: any) => {
 						const reciept = await tx.wait();
@@ -110,7 +110,7 @@ const Result = () => {
 							// load the game contract function withdrawBetAmount
 							await gameContract
 								.withdrawBetAmount(address, {
-									maxPriorityFeePerGas: priorityFee,
+									//maxPriorityFeePerGas: priorityFee,
 								})
 								.then(async (tx: any) => {
 									const reciept = await tx.wait();
@@ -125,21 +125,22 @@ const Result = () => {
 								});
 						}
 					});
+			} else {
+				await gameContract
+					.deleteUser(address, {
+						//maxPriorityFeePerGas: priorityFee,
+					})
+					.then(async (tx: any) => {
+						const reciept = await tx.wait();
+						console.log('reciept of deletePlayer---', reciept);
+						if (reciept.status) {
+							setAlertText('Your data has been deleted successfully')
+							handleOpen();
+							// alert('Your data has been deleted successfully');
+						}
+					});
 			}
 			// load the game contract function deletePlayer
-			await gameContract
-				.deleteUser(address, {
-					maxPriorityFeePerGas: priorityFee,
-				})
-				.then(async (tx: any) => {
-					const reciept = await tx.wait();
-					console.log('reciept of deletePlayer---', reciept);
-					if (reciept.status) {
-						setAlertText('Your data has been deleted successfully')
-						handleOpen();
-						// alert('Your data has been deleted successfully');
-					}
-				});
 		} else {
 			setAlertText('You have not played any game yet, Please first participate in Duel')
 			handleOpen();
