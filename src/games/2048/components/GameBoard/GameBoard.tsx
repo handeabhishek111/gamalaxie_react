@@ -59,7 +59,7 @@ const GameBoard: FC<GameBoardProps> = ({
   const boardRef = useRef<HTMLDivElement>(null);
   const [image, takeScreenshot] = useScreenshot();
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("You have won a NFT, Click here to");
+  const [msg, setMsg] = useState(`You have won a NFT,\nClick here to`);
 
   useArrowKeyPress(onMove);
   useSwipe(boardRef, onMove);
@@ -220,9 +220,9 @@ const GameBoard: FC<GameBoardProps> = ({
 
   return (
     <Box1 flex={1} flexDirection='column' >
-      <Button onClick={() => navigate('/duel-start')} variant="contained" color="success">
+      {/* <Button onClick={() => navigate('/duel-start')} variant="contained" color="success">
         Start Duel
-      </Button>
+      </Button> */}
       {!loading ? <Fragment>
         <Box position="relative" ref={boardRef}>
           <Grid
@@ -262,14 +262,15 @@ const GameBoard: FC<GameBoardProps> = ({
           onClose={() => onCloseNotification(gameStatus)}
         />
       )} */}
-        {(gameStatus === 'win' || gameStatus === 'lost') && <Box1 display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} flex={1} borderRadius={2} bgcolor={colors.moderateRed} marginY={1} padding={2} >
-          <Typography textAlign={"center"}>
-            {msg}
-          </Typography>
-          {msg != "Error" && <Button onClick={() => navigate('/duel-start')} variant="contained" color="success">
-            Start Duel
-          </Button>}
-        </Box1>}
+        {(gameStatus === 'win' || gameStatus === 'lost') &&
+          <Box1 display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} flex={1} borderRadius={2} bgcolor={colors.moderateRed} marginY={1} padding={2} >
+            <Typography px={1} textAlign={"center"}>
+              {msg}
+            </Typography>
+            {msg != "Error" && <Button onClick={() => navigate('/duel-start')} variant="contained" color="success">
+              Start Duel
+            </Button>}
+          </Box1>}
       </Fragment> : <Box1 flex={1} display={"flex"} justifyContent={'center'} alignItems={'center'} marginY={7}>
         <BounceLoader
           color={colors.desaturatedYellow}
