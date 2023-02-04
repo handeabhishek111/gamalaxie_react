@@ -37,6 +37,7 @@ const DuelStart = () => {
     const [tokenScore, setTokenScore] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [loading2, setLoading2] = useState(false);
+    const [showResultButtion, setShowResultButtion] = useState(true);
     const [openModal, setOpenModal] = React.useState(false);
 
     const navigate = useNavigate();
@@ -49,9 +50,8 @@ const DuelStart = () => {
         bgcolor: colors.white,
         border: `2px solid ${colors.desaturatedYellow}`,
         boxShadow: 24,
-        pt: 2,
+        py: 2,
         px: 4,
-        pb: 3,
     };
     useEffect(() => {
         setLoading(true);
@@ -110,10 +110,11 @@ const DuelStart = () => {
         const isPersoninQueue = await gameContract.isPersonInQueue(address);
         if (!isPersoninQueue) {
             handleOpen();
-            setLoading2(true)
+            setLoading2(true);
+            setShowResultButtion(true);
             await gameContract
                 .getBetAmount({
-                    maxPriorityFeePerGas: priorityFee,
+                    //maxPriorityFeePerGas: priorityFee,
                     value: ethers.utils.parseEther('0.01'),
                 })
                 .then(async (tx: any) => {
@@ -122,7 +123,7 @@ const DuelStart = () => {
                     if (reciept.status) {
                         await gameContract
                             .joinQueue(address, tokenId, parseInt(tokenScore), {
-                                maxPriorityFeePerGas: priorityFee,
+                                //maxPriorityFeePerGas: priorityFee,
                             })
                             .then(async (tx: any) => {
                                 const reciept = await tx.wait();
@@ -135,8 +136,11 @@ const DuelStart = () => {
                     }
                 })
                 .catch(() => {
+                    setShowResultButtion(false);
                     setLoading2(false)
                 })
+        } else {
+            console.log("If person is in queue")
         }
     };
     const handleOpen = () => {
@@ -186,7 +190,7 @@ const DuelStart = () => {
                         </Box>
                     </Box>
                 </Grid>
-                {!loading ? <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
+                {!loading ? !!nftCardList.length ? <Grid marginTop={2} xs={12} rowSpacing={1} container justifyContent={'space-evelnly'} >
                     {nftCardList.map((item: dataProps, index: number) => (
                         <NFTBlockPuzzleCard
                             data={item}
@@ -195,8 +199,13 @@ const DuelStart = () => {
                             getTokenData={(id: string, score: string) => { setTokenId(id); setTokenScore(score) }}
                         />
                     ))}
-                </Grid> :
-                    <Box flex={1} display={"flex"} justifyContent={'center'} alignItems={'center'} marginY={7}>
+                </Grid> : <Box marginTop={'5em'} display={'flex'} alignItems={"center"} flexDirection={'column'} justifyContent={'center'}>
+                    <img src={images.noDataFound} width={'calc(25 % - 30px)'} height={220} />
+                    <Typography color={colors.veryDarkBlue} fontWeight={'bold'} fontSize={fontSize.sm} alignItems={'center'}>
+                        No data found
+                    </Typography>
+                </Box> :
+                    <Box marginTop={'5em'} flex={1} display={"flex"} justifyContent={'center'} alignItems={'center'} marginY={7}>
                         <BounceLoader
                             color={colors.desaturatedYellow}
                             loading={loading}
@@ -206,28 +215,39 @@ const DuelStart = () => {
                 }
             </Grid>
             <Modal
-                hideBackdrop
                 open={openModal}
                 aria-labelledby="child-modal-title"
                 aria-describedby="child-modal-description"
             >
-                <Box alignContent={'center'} sx={{ ...style, width: 200 }}>
-                    {loading2 ? <Fragment>
-                        <BounceLoader
-                            color={colors.desaturatedYellow}
-                            loading={loading2}
-                            size={150}
-                        />
-                        <Typography color={colors.veryDarkBlue} fontWeight={'bold'} fontSize={fontSize.lg} alignItems={'flex-start'}>
-                            Please wait.....
+                <Box alignContent={'center'} sx={{ ...style, width: '25%' }} borderRadius={2}>
+                    {loading2 ? <Box paddingY={1} flex={1} display={'flex'} flexDirection={'column'}>
+                        <Box display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>
+                            <BounceLoader
+                                color={colors.desaturatedYellow}
+                                loading={loading2}
+                                size={150}
+                            />
+                        </Box>
+                        <Typography mt={1} color={colors.moderateRed} fontWeight={'bold'} fontSize={fontSize.md} textAlign={'center'}>
+                            Please wait
                         </Typography>
-                    </Fragment> : <Box paddingY={2} flex={1} display={'flex'} alignItems={'center'} justifyContent={'space-evenly'} flexDirection={'row'}>
-                        <Button onClick={() => navigate('result')} variant="contained" color={'success'}>
-                            Show Result
-                        </Button>
-                        <Button onClick={() => handleClose()} variant="contained" color={'success'}>
-                            Cancel
-                        </Button>
+                    </Box> : <Box paddingY={1} flex={1} display={'flex'} flexDirection={'column'} >
+                        <Box display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>
+                            <img src={images.wellDone} width={"45%"} height={"45%"} />
+                        </Box>
+                        <Grid container >
+                            {showResultButtion && <Grid px={1} alignItems={'center'} justifyContent={'center'} display={'flex'} md={6} sm={12} xs={12}>
+                                <Button fullWidth onClick={() => navigate('/result')} variant="contained" color={'success'}>
+                                    Show Result
+                                </Button>
+                            </Grid>}
+                            <Grid px={1} item md={showResultButtion ? 6 : 12} sm={12} xs={12}>
+                                <Button fullWidth onClick={() => handleClose()} variant="contained" color={'warning'}>
+                                    Cancel
+                                </Button>
+                            </Grid>
+                        </Grid>
+
                     </Box>}
 
                 </Box>

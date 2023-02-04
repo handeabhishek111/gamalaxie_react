@@ -63,7 +63,7 @@ const SlidingBlockPuzzle = () => {
                         </Box>
                     </Box>
                 </Box>
-                <Grid item>
+                <Grid item pt={1}>
                     <BlockPuzzleComponent newGameFn={newGameTrigger} bestPropScore={(best: number) => setBestScore(best)} currentPropScore={(current: number) => setCurrentScore(current)} setCurrentLoader={(bol: boolean) => { setDisableButton(bol) }} />
                 </Grid>
             </Grid>

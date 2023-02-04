@@ -59,7 +59,7 @@ const GameBoard: FC<GameBoardProps> = ({
   const boardRef = useRef<HTMLDivElement>(null);
   const [image, takeScreenshot] = useScreenshot();
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState("You have won a NFT, Click here to");
+  const [msg, setMsg] = useState(`You have won a NFT,\nClick here to`);
 
   useArrowKeyPress(onMove);
   useSwipe(boardRef, onMove);
@@ -151,29 +151,28 @@ const GameBoard: FC<GameBoardProps> = ({
                   })
                   .then(async (responseJson) => {
                     if (responseJson.ok) {
-                      const priorityFee = await callRpc(
-                        'eth_maxPriorityFeePerGas'
-                      );
-                      const gasPrice = await callRpc('eth_gasPrice');
+                      // const gasPrice = await callRpc('eth_gasPrice');
                       let link = `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`;
-                      console.log(
-                        'responseJson-----',
-                        `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`,
-                        '\n gasPrice---',
-                        gasPrice,
-                        '\n priorityFee---',
-                        priorityFee,
-                      );
+
                       const signer: any = await fetchSigner();
                       const nftcontract = new ethers.Contract(
                         REACT_APP_NFT_CONTRACT || '',
                         nftAbi,
                         signer
                       );
+                      const priorityFee = await callRpc(
+                        'eth_maxPriorityFeePerGas'
+                      );
+                      console.log(
+                        'responseJson-----',
+                        `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`,
+                        '\n priorityFee---',
+                        priorityFee,
+                      );
                       await nftcontract
                         .safeMint(address, link, {
                           // gasLimit: 1000000000,
-                          maxPriorityFeePerGas: priorityFee,
+                          // maxPriorityFeePerGas: priorityFee,
                         })
                         .then(async (tx: any) => {
                           const receipt = await tx.wait();
@@ -183,12 +182,8 @@ const GameBoard: FC<GameBoardProps> = ({
                             '\n receipt---',
                             receipt
                           );
-                          Promise.all(receipt)
-                            .then(() => {
-                              // navigate('duel-start')
-                              setLoading(false);
-                              setCurrentLoader(false);
-                            })
+                          setLoading(false);
+                          setCurrentLoader(false);
                         }).catch(() => {
                           console.log("error")
                           setMsg("Error")
@@ -225,6 +220,9 @@ const GameBoard: FC<GameBoardProps> = ({
 
   return (
     <Box1 flex={1} flexDirection='column' >
+      {/* <Button onClick={() => navigate('/duel-start')} variant="contained" color="success">
+        Start Duel
+      </Button> */}
       {!loading ? <Fragment>
         <Box position="relative" ref={boardRef}>
           <Grid
@@ -264,14 +262,15 @@ const GameBoard: FC<GameBoardProps> = ({
           onClose={() => onCloseNotification(gameStatus)}
         />
       )} */}
-        {(gameStatus === 'win' || gameStatus === 'lost') && <Box1 display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} flex={1} borderRadius={2} bgcolor={colors.moderateRed} marginY={1} padding={2} >
-          <Typography textAlign={"center"}>
-            {msg}
-          </Typography>
-          {msg != "Error" && <Button onClick={() => navigate('duel-start')} variant="contained" color="success">
-            Start Duel
-          </Button>}
-        </Box1>}
+        {(gameStatus === 'win' || gameStatus === 'lost') &&
+          <Box1 display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} flex={1} borderRadius={2} bgcolor={colors.moderateRed} marginY={1} padding={2} >
+            <Typography px={1} textAlign={"center"}>
+              {msg}
+            </Typography>
+            {msg != "Error" && <Button onClick={() => navigate('/duel-start')} variant="contained" color="success">
+              Start Duel
+            </Button>}
+          </Box1>}
       </Fragment> : <Box1 flex={1} display={"flex"} justifyContent={'center'} alignItems={'center'} marginY={7}>
         <BounceLoader
           color={colors.desaturatedYellow}

@@ -29,4 +29,4 @@ export const callRpc = async (method: any, params?: any) => {
 }
 
 export const REACT_APP_NFT_CONTRACT = "0x7cE7316C75F7F70571F7b8b8BEf7B77873C3D94a";
-export const REACT_APP_GAME_CONTRACT = "0x200586063643040Bb31E4a0a57118dd4bB39e761";
+export const REACT_APP_GAME_CONTRACT = "0xf2bB723A48D9FBf2674d2A02bd034B116e797416";
