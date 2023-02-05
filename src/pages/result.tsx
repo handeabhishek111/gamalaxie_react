@@ -79,9 +79,7 @@ const Result = () => {
 			const lastBattleFought = JSON.parse(userData.lastBattleFought);
 			console.log(lastBattleFought);
 			setGameResult(lastBattleFought ? 'You Won' : 'You Lost');
-			setAlertText(lastBattleFought
-				? 'You Won, to claim the reward you must burn your NFT.\nPlease Approve to burn the NFT'
-				: 'You Lost, Your data will be deleted so you can play the next game.\nPlease Approve to burn the NFT')
+			setAlertText(lastBattleFought ? 'You Won, to claim the reward you must burn your NFT.\nPlease Approve to burn the NFT' : 'You Lost, Your data will be deleted so you can play the next game.\nPlease Approve to burn the NFT');
 			handleOpen();
 			// declare the NFT contract
 			const nftContract = new ethers.Contract(
@@ -115,9 +113,10 @@ const Result = () => {
 									console.log('reciept of withdrawBetAmount---', reciept);
 									if (reciept.status) {
 										setLoading(false);
+										setLoading1(false);
 										setAlertText('Reward Claimed Successfully, Your data has been deleted successfully so can play the next game')
-										handleOpen();
 										setShowCancelButton(true);
+										handleOpen();
 									}
 								});
 						}
@@ -134,9 +133,10 @@ const Result = () => {
 						console.log('reciept of deletePlayer---', reciept);
 						if (reciept.status) {
 							setLoading(false);
+							setLoading1(false);
 							setAlertText('Your data has been deleted successfully')
-							handleOpen();
 							setShowCancelButton(true);
+							handleOpen();
 						}
 					});
 			}
@@ -189,7 +189,8 @@ const Result = () => {
 					>
 						<Box >
 							<Box display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>
-								<img style={{ borderRadius: 10 }} src={gameResult === 'You Won' ? images.trophy : gameResult === 'You Lost' ? images.crying : images.checkResult} width={500} height={400} />
+								{!!gameResult.length ? <img style={{ borderRadius: 10 }} src={gameResult === 'You Won' ? images.trophy : images.crying} width={500} height={400} />
+									: <img style={{ borderRadius: 10 }} src={images.checkResult} width={500} height={400} />}
 							</Box>
 							<Box mt={1} display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'} >
 								<Button
