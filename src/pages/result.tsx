@@ -189,8 +189,7 @@ const Result = () => {
 					>
 						<Box >
 							<Box display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'}>
-								{/* <img style={{ borderRadius: 10 }} src={gameResult === 'You Won' ? images.trophy : gameResult === 'You Lost' ? images.crying : images.checkResult} width={"45%"} height={"45%"} /> */}
-								<img style={{ borderRadius: 10 }} src={images.checkResult} width={500} height={400} />
+								<img style={{ borderRadius: 10 }} src={gameResult === 'You Won' ? images.trophy : gameResult === 'You Lost' ? images.crying : images.checkResult} width={500} height={400} />
 							</Box>
 							<Box mt={1} display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'} >
 								<Button
@@ -202,7 +201,7 @@ const Result = () => {
 								</Button>
 							</Box>
 						</Box>
-						{gameResult && (
+						{!!gameResult.length && (
 							<Typography
 								marginTop={2}
 								color={colors.veryDarkBlue}
