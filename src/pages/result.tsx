@@ -79,7 +79,7 @@ const Result = () => {
 			const lastBattleFought = JSON.parse(userData.lastBattleFought);
 			console.log(lastBattleFought);
 			setGameResult(lastBattleFought ? 'You Won' : 'You Lost');
-			setAlertText(lastBattleFought ? 'You Won, to claim the reward you must burn your NFT.\nPlease Approve to burn the NFT' : 'You Lost, Your data will be deleted so you can play the next game.\nPlease Approve to burn the NFT');
+			setAlertText(lastBattleFought ? 'You Won, to claim the reward you must burn your NFT.\nPlease Approve to burn the NFT' : 'You Lost, Your data will be deleted so you can play the next game.');
 			handleOpen();
 			// declare the NFT contract
 			const nftContract = new ethers.Contract(
