@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter } from 'react-router-dom';
 import './index.css'
 //fonts
 import '@fontsource/roboto/300.css';
@@ -18,7 +18,7 @@ const config = {
 }
 
 root.render(
-  <BrowserRouter basename={config.defaultPath}>
+  <HashRouter basename={config.defaultPath}>
     <App />
-  </BrowserRouter>
+  </HashRouter>
 );
