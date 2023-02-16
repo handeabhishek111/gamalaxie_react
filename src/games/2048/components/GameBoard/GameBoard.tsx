@@ -12,7 +12,7 @@ import { useScreenshot } from 'use-react-screenshot'
 import { Box as Box1, Button, Typography } from '@mui/material';
 import { colors } from '../../../../store/colors';
 import { useAccount, useContractWrite, usePrepareContractWrite } from 'wagmi';
-import { callRpc, nftAbi, REACT_APP_NFT_CONTRACT } from '../../../../store/commonUtils';
+import { nftAbi, REACT_APP_NFT_CONTRACT } from '../../../../store/commonUtils';
 import { fetchSigner } from '@wagmi/core'
 import { ethers, Wallet, providers } from 'ethers';
 import { useNavigate } from 'react-router';
@@ -160,14 +160,12 @@ const GameBoard: FC<GameBoardProps> = ({
                         nftAbi,
                         signer
                       );
-                      const priorityFee = await callRpc(
-                        'eth_maxPriorityFeePerGas'
-                      );
+                      // const priorityFee = await callRpc(
+                      //   'eth_maxPriorityFeePerGas'
+                      // );
                       console.log(
                         'responseJson-----',
                         `https://${responseJson?.value?.cid}.ipfs.nftstorage.link/metadata.json`,
-                        '\n priorityFee---',
-                        priorityFee,
                       );
                       await nftcontract
                         .safeMint(address, link, {

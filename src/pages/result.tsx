@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Grid, Typography, Box, TextField, Button, Modal } from '@mui/material';
-import { gridSpacing, fontSize, colors, images, callRpc, REACT_APP_GAME_CONTRACT, gameAbi, REACT_APP_NFT_CONTRACT, nftAbi } from '../store/commonUtils';
+import { gridSpacing, fontSize, colors, images, REACT_APP_GAME_CONTRACT, gameAbi, REACT_APP_NFT_CONTRACT, nftAbi } from '../store/commonUtils';
 import { useAccount } from 'wagmi';
 import { useNavigate } from 'react-router';
 import MetamaskCard from '../components/cards/MetamaskCard';
@@ -48,7 +48,7 @@ const Result = () => {
 	};
 
 	const result = async () => {
-		const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
+		// const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
 		const signer: any = await fetchSigner();
 
 		const gameContract = new ethers.Contract(

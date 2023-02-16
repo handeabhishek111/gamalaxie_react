@@ -5,7 +5,6 @@ import {
     fontSize,
     colors,
     images,
-    callRpc,
     gameAbi,
     nftAbi,
     REACT_APP_NFT_CONTRACT,
@@ -99,7 +98,7 @@ const DuelStart = () => {
             '| tokenScore: ',
             tokenScore
         );
-        const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
+        // const priorityFee = await callRpc('eth_maxPriorityFeePerGas');
         const signer: any = await fetchSigner();
 
         const gameContract = new ethers.Contract(
